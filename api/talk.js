@@ -24,16 +24,6 @@ const data = await response.json()
 
 let text = "今日はゲームの話でもしましょうか。"
 
-if(
-data.candidates &&
-data.candidates[0] &&
-data.candidates[0].content &&
-data.candidates[0].content.parts &&
-data.candidates[0].content.parts[0]
-){
-text = data.candidates[0].content.parts[0].text
-}
-
-res.status(200).json({ text })
+res.status(200).json(data)
 
 }
