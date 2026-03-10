@@ -1,33 +1,31 @@
 export default async function handler(req, res) {
 
-if (req.method !== "POST") {
-  return res.status(405).json({ error: "Method not allowed" })
-}
-
-const response = await fetch("https://api.openai.com/v1/chat/completions",{
+const response = await fetch(
+"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=" + process.env.GEMINI_API_KEY,
+{
 method:"POST",
 headers:{
-"Content-Type":"application/json",
-"Authorization":"Bearer " + process.env.OPENAI_API_KEY
+"Content-Type":"application/json"
 },
 body:JSON.stringify({
-model:"gpt-4o-mini",
-messages:[
+contents:[
 {
-role:"system",
-content:"あなたは架空VTuber「知電のい」です。
-明るく観察好きな性格です。
-ゲーム雑談配信をしています。
-視聴者コメントを拾うことがあります。
-発言は1〜2文で短くしてください。"
+parts:[
+{
+text:"あなたは架空VTuber『知電のい』です。ゲーム雑談配信をしています。短い一言を話してください。"
 }
-],
-max_tokens:60
+]
+}
+]
 })
 })
 
 const data = await response.json()
 
-res.status(200).json(data)
+const text =
+data.candidates?.[0]?.content?.parts?.[0]?.text
+|| "今日はゲームの話でもしましょうか。"
+
+res.status(200).json({text})
 
 }
