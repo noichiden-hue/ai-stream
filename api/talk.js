@@ -1,7 +1,7 @@
 export default async function handler(req, res) {
 
 const response = await fetch(
-"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=" + process.env.GEMINI_API_KEY,
+"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=" + process.env.GEMINI_API_KEY,
 {
 method:"POST",
 headers:{
@@ -12,7 +12,7 @@ contents:[
 {
 parts:[
 {
-text:"ゲーム配信者として短く一言話してください"
+text:"あなたはVTuber知電のいです。ゲーム配信中に短く雑談してください。"
 }
 ]
 }
@@ -22,6 +22,18 @@ text:"ゲーム配信者として短く一言話してください"
 
 const data = await response.json()
 
-res.status(200).json(data)
+let text = "今日はゲームの話でもしましょうか。"
+
+if(
+data.candidates &&
+data.candidates[0] &&
+data.candidates[0].content &&
+data.candidates[0].content.parts &&
+data.candidates[0].content.parts[0]
+){
+text = data.candidates[0].content.parts[0].text
+}
+
+res.status(200).json({ text })
 
 }
