@@ -52,15 +52,25 @@ temperature:1.1
 
 const data = await response.json()
 
-let text = "ニュース読めませんでした"
+let text = "読めていないようです"
 
-if(data.candidates && data.candidates.length > 0){
+// 安全に取り出す
+if(
+data &&
+data.candidates &&
+data.candidates[0] &&
+data.candidates[0].content &&
+data.candidates[0].content.parts &&
+data.candidates[0].content.parts[0] &&
+data.candidates[0].content.parts[0].text
+){
 text = data.candidates[0].content.parts[0].text
 }
 
 res.status(200).json({
 news:title,
-talk:text
+talk:text,
+debug:data
 })
 
 } catch(error){
