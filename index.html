@@ -108,6 +108,9 @@
             function loop(){
 
                 if(!streamRunning) return
+                if(Math.random() < 0.3){
+                    aiTalk()
+                }
                 updateTopic()
                 generateFakeConversation()
                 let next = 2000 + Math.random()*5000
@@ -163,17 +166,23 @@
                 }
             }
 
-        function noiReply(comment){
-            setTimeout(()=>{noiTalk("なるほど、「"+comment+"」という反応がありますね。")},2000)
-        }
+            async function aiTalk(){
+                const res = await fetch("/api/talk")
+                const data = await res.json()
+                const text = data.choices[0].message.content
+                noiTalk(text)
+            }
+            function noiReply(comment){
+                setTimeout(()=>{noiTalk("なるほど、「"+comment+"」という反応がありますね。")},2000)
+            }
 
-        function addChat(name,text){
-            const chat = document.getElementById("chat")
-            const msg = document.createElement("div")
-            msg.innerText = name + " : " + text
-            chat.appendChild(msg)
-            chat.scrollTop = chat.scrollHeight
-        }
+            function addChat(name,text){
+                const chat = document.getElementById("chat")
+                const msg = document.createElement("div")
+                msg.innerText = name + " : " + text
+                chat.appendChild(msg)
+                chat.scrollTop = chat.scrollHeight
+            }
         </script>
     </body>
 </html>
