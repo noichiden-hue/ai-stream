@@ -1,16 +1,21 @@
 <!DOCTYPE html>
 <html>
+
 <head>
+
 <meta charset="UTF-8">
+
 <title>知電のい 配信</title>
+
 <style>
+
 body{
 background:#111;
 color:white;
 font-family:sans-serif;
 }
 
-#stream{
+#container{
 width:800px;
 margin:auto;
 }
@@ -20,17 +25,22 @@ height:300px;
 overflow:auto;
 border:1px solid #555;
 padding:10px;
+margin-top:10px;
 }
 
 button{
 padding:10px 20px;
+font-size:16px;
 }
+
 </style>
+
 </head>
+
 
 <body>
 
-<div id="stream">
+<div id="container">
 
 <h1>知電のい 配信</h1>
 
@@ -42,30 +52,119 @@ padding:10px 20px;
 
 </div>
 
+
+
 <script>
+
+let streamRunning = false
+let streamStart
+let streamDuration = 60 * 60 * 1000
+
+
+const listeners = [
+"のい推し",
+"祭り勢",
+"冷静ツッコミ",
+"ROM勢"
+]
+
+
+const comments = [
+"それわかる",
+"神ゲーでは？",
+"草",
+"気になる",
+"それSwitchあります？",
+"今日も観測助かる"
+]
+
 
 function startStream(){
 
-document.getElementById("topic").innerText =
-"ログインしました。知電のいです。";
+if(streamRunning) return
 
-addChat("のい推し","配信きた！");
-addChat("祭り勢","待ってました");
+streamRunning = true
+streamStart = Date.now()
+
+addChat("SYSTEM","配信開始")
+
+noiTalk("ログインしました。知電のいです。")
+
+setInterval(streamLoop,5000)
+
 }
+
+
+function streamLoop(){
+
+if(!streamRunning) return
+
+let now = Date.now()
+
+if(now - streamStart > streamDuration){
+
+noiTalk("知電のいでした。ログアウトします。")
+
+addChat("SYSTEM","配信終了")
+
+streamRunning = false
+
+return
+
+}
+
+generateFakeConversation()
+
+}
+
+
+
+function noiTalk(text){
+
+const chat = document.getElementById("chat")
+
+const msg = document.createElement("div")
+
+msg.innerText = "知電のい : " + text
+
+chat.appendChild(msg)
+
+chat.scrollTop = chat.scrollHeight
+
+}
+
+
+
+function generateFakeConversation(){
+
+let randomComment =
+comments[Math.floor(Math.random()*comments.length)]
+
+let randomUser =
+listeners[Math.floor(Math.random()*listeners.length)]
+
+addChat(randomUser,randomComment)
+
+}
+
+
 
 function addChat(name,text){
 
-const chat = document.getElementById("chat");
+const chat = document.getElementById("chat")
 
-const msg = document.createElement("div");
+const msg = document.createElement("div")
 
-msg.innerText = name + " : " + text;
+msg.innerText = name + " : " + text
 
-chat.appendChild(msg);
+chat.appendChild(msg)
+
+chat.scrollTop = chat.scrollHeight
 
 }
 
 </script>
 
 </body>
+
 </html>
