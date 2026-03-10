@@ -1,12 +1,10 @@
-export default async function handler(req, res) {
+module.exports = async function handler(req, res) {
 
 try {
 
-// RSS取得
 const rss = await fetch("https://feeds.feedburner.com/ign/games-all")
 const xml = await rss.text()
 
-// 記事タイトル取得
 const itemMatch = xml.match(/<item>[\s\S]*?<title>(.*?)<\/title>/)
 
 let title = "ゲームニュース"
@@ -25,7 +23,6 @@ ${title}
 ルール
 ・2〜3文
 ・配信雑談トーン
-・ゲームタイトルを含める
 ・軽い感想
 
 雑談コメントを作ってください。
@@ -74,5 +71,4 @@ error:error.message
 
 }
 
-}
 }
