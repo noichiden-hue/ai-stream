@@ -1,36 +1,34 @@
-import Parser from "rss-parser"
-
 export default async function handler(req, res) {
 
 try {
 
-const parser = new Parser()
+// RSS取得
+const rss = await fetch("https://feeds.feedburner.com/ign/games-all")
+const xml = await rss.text()
 
-// ゲームニュース取得
-const feed = await parser.parseURL(
-"https://feeds.feedburner.com/ign/games-all"
-)
+// タイトル抽出
+const titleMatch = xml.match(/<title><!\[CDATA\[(.*?)\]\]><\/title>/)
 
-const news = feed.items[0]
+let title = "ゲームニュース"
+
+if(titleMatch){
+title = titleMatch[1]
+}
 
 const prompt = `
-あなたはVTuber「知電のい」です。
+あなたはVTuber知電のいです。
 ゲームニュースを雑談配信で紹介しています。
 
 ニュースタイトル
-${news.title}
-
-ニュース概要
-${news.contentSnippet}
+${title}
 
 ルール
 ・2〜3文
 ・配信雑談トーン
 ・ゲームタイトルを含める
-・最後に軽い感想
+・軽い感想
 
 雑談コメントを作ってください。
-自己紹介文は不要です
 `
 
 const response = await fetch(
@@ -64,8 +62,8 @@ text = data.candidates[0].content.parts[0].text
 }
 
 res.status(200).json({
-news: news.title,
-talk: text
+news:title,
+talk:text
 })
 
 } catch(error){
@@ -73,6 +71,8 @@ talk: text
 res.status(500).json({
 error:error.message
 })
+
+}
 
 }
 
