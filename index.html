@@ -167,7 +167,7 @@
             }
 
             async function aiTalk(){
-                const res = await fetch("/api/talk")
+                const res = await fetch("/api/talk",{method:"POST"})
                 const data = await res.json()
                 const text = data.choices[0].message.content
                 noiTalk(text)
@@ -186,5 +186,6 @@
         </script>
     </body>
 </html>
+
 
 
