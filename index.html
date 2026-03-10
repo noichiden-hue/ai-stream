@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>知電のい 配信</title>
+<style>
+body{
+background:#111;
+color:white;
+font-family:sans-serif;
+}
+
+#stream{
+width:800px;
+margin:auto;
+}
+
+#chat{
+height:300px;
+overflow:auto;
+border:1px solid #555;
+padding:10px;
+}
+
+button{
+padding:10px 20px;
+}
+</style>
+</head>
+
+<body>
+
+<div id="stream">
+
+<h1>知電のい 配信</h1>
+
+<button onclick="startStream()">配信開始</button>
+
+<p id="topic">待機中</p>
+
+<div id="chat"></div>
+
+</div>
+
+<script>
+
+function startStream(){
+
+document.getElementById("topic").innerText =
+"ログインしました。知電のいです。";
+
+addChat("のい推し","配信きた！");
+addChat("祭り勢","待ってました");
+}
+
+function addChat(name,text){
+
+const chat = document.getElementById("chat");
+
+const msg = document.createElement("div");
+
+msg.innerText = name + " : " + text;
+
+chat.appendChild(msg);
+
+}
+
+</script>
+
+</body>
+</html>
