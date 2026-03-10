@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <title>知電のい 配信</title>
+        <style>
+
+            body{
+                background:#111;
+                color:white;
+                font-family:sans-serif;
+            }
+
+            #container{
+                width:800px;
+                margin:auto;
+            }
+
+            #chat{
+                height:300px;
+                overflow:auto;
+                border:1px solid #555;
+                padding:10px;
+                margin-top:10px;
+            }
+
+            button{
+                padding:10px 20px;
+                font-size:16px;
+            }
+
+        </style>
+    </head>
+
+    <body>
+        <div id="container">
+            <h1>知電のい 配信</h1>
+            <button onclick="startStream()">配信開始</button>
+            <p id="topic">待機中</p>
+            <div id="chat"></div>
+        </div>
+
+        <script>
+
+            let streamRunning = false
+            let streamStart
+            let streamDuration = 60 * 60 * 1000
+        
+            const topics = [
+                "今日のゲームトレンド",
+                "インディーゲーム",
+                "話題のゲーム",
+                "最近遊んだゲーム"
+            ]
+
+            const listeners = [
+                "のい推し",
+                "祭り勢",
+                "冷静ツッコミ",
+                "ROM勢"
+            ]
+
+            const comments = [
+                "それわかる",
+                "神ゲーでは？",
+                "草",
+                "気になる",
+                "それSwitchあります？",
+                "今日も観測助かる"
+            ]
+            
+            const listenerComments = {
+                "のい推し":[
+                    "それめっちゃわかる",
+                    "のいちゃん視点好き",
+                    "今日の配信助かる"
+                    ],
+
+                "祭り勢":[
+                    "草",
+                    "神ゲーの予感",
+                    "それ盛り上がるやつ"
+                    ],
+
+                "冷静ツッコミ":[
+                    "それ積みゲーでは？",
+                    "また増えますね",
+                    "それ昨日も言ってません？"
+                    ],
+
+                "ROM勢":[
+                    "それSwitchあります？",
+                    "どんなゲームです？",
+                    "プレイ時間どのくらいですか？"
+                    ]
+            }
+
+            function startStream(){
+                if(streamRunning) return
+
+                streamRunning = true
+                streamStart = Date.now()
+                addChat("SYSTEM","配信開始")
+                noiTalk("ログインしました。知電のいです。")
+                loop()
+            }
+
+            function loop(){
+
+                if(!streamRunning) return
+                if(Math.random() < 0.3){
+                    aiTalk()
+                }
+                updateTopic()
+                generateFakeConversation()
+                let next = 2000 + Math.random()*5000
+                setTimeout(loop,next)
+                if(Date.now() - streamStart > streamDuration){
+                    noiTalk("そろそろ時間ですね。")
+                    setTimeout(()=>{
+                        noiTalk("知電のいでした。ログアウトします。")
+                        addChat("SYSTEM","配信終了")
+                        },3000)
+
+                    streamRunning = false
+                    return
+
+                }
+            }
+
+
+            function noiTalk(text){
+                const chat = document.getElementById("chat")
+                const msg = document.createElement("div")
+                msg.innerText = "知電のい : " + text
+                chat.appendChild(msg)
+                chat.scrollTop = chat.scrollHeight
+            }
+
+            let currentTopicIndex = -1
+
+            function updateTopic(){
+                let elapsed = Date.now() - streamStart
+                let index = Math.floor(elapsed / (15*60*1000))
+                if(index >= topics.length) index = topics.length-1
+                if(index !== currentTopicIndex){
+                    currentTopicIndex = index
+                    document.getElementById("topic").innerText =
+                    "テーマ: " + topics[index]
+                    noiTalk("さて、次の話題は「"+topics[index]+"」です。")
+                }
+            }
+
+
+            function generateFakeConversation(){
+                let users = Object.keys(listenerComments)
+                let commentCount = 1 + Math.floor(Math.random()*3)
+                for(let i=0;i<commentCount;i++){
+                    let user = users[Math.floor(Math.random()*users.length)]
+                    let list = listenerComments[user]
+                    let text = list[Math.floor(Math.random()*list.length)]
+                    addChat(user,text)
+                    if(Math.random() < 0.2){
+                        noiReply(text)
+                    }
+                }
+            }
+
+            async function aiTalk(){
+                const res = await fetch("/api/talk")
+                const data = await res.json()
+                const text = data.choices[0].message.content
+                noiTalk(text)
+            }
+            function noiReply(comment){
+                setTimeout(()=>{noiTalk("なるほど、「"+comment+"」という反応がありますね。")},2000)
+            }
+
+            function addChat(name,text){
+                const chat = document.getElementById("chat")
+                const msg = document.createElement("div")
+                msg.innerText = name + " : " + text
+                chat.appendChild(msg)
+                chat.scrollTop = chat.scrollHeight
+            }
+        </script>
+    </body>
+</html>
+
+
