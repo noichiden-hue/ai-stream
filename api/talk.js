@@ -6,20 +6,20 @@ try {
 const rss = await fetch("https://feeds.feedburner.com/ign/games-all")
 const xml = await rss.text()
 
-// タイトル抽出
-const titleMatch = xml.match(/<title><!\[CDATA\[(.*?)\]\]><\/title>/)
+// 記事タイトル取得
+const itemMatch = xml.match(/<item>[\s\S]*?<title>(.*?)<\/title>/)
 
 let title = "ゲームニュース"
 
-if(titleMatch){
-title = titleMatch[1]
+if(itemMatch){
+title = itemMatch[1]
 }
 
 const prompt = `
 あなたはVTuber知電のいです。
 ゲームニュースを雑談配信で紹介しています。
 
-ニュースタイトル
+ニュース
 ${title}
 
 ルール
@@ -57,7 +57,7 @@ const data = await response.json()
 
 let text = "ニュース読めませんでした"
 
-if(data.candidates){
+if(data.candidates && data.candidates.length > 0){
 text = data.candidates[0].content.parts[0].text
 }
 
@@ -75,5 +75,4 @@ error:error.message
 }
 
 }
-
 }
