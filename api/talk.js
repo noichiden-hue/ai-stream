@@ -1,5 +1,9 @@
 export default async function handler(req, res) {
 
+if (req.method !== "POST") {
+  return res.status(405).json({ error: "Method not allowed" })
+}
+
 const response = await fetch("https://api.openai.com/v1/chat/completions",{
 method:"POST",
 headers:{
@@ -13,7 +17,8 @@ messages:[
 role:"system",
 content:"あなたはVTuber知電のいです。ゲーム雑談配信をしています。短い発言をしてください。"
 }
-]
+],
+max_tokens:60
 })
 })
 
