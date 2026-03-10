@@ -137,6 +137,16 @@
                 chat.scrollTop = chat.scrollHeight
             }
 
+            async function aiTalk(){
+                const res = await fetch("/api/talk",{method:"POST"})
+                const data = await res.json()
+                const text = data.text
+                noiTalk(text)
+            }
+            function noiReply(comment){
+                setTimeout(()=>{noiTalk("なるほど、「"+comment+"」という反応がありますね。")},2000)
+            }
+            
             let currentTopicIndex = -1
 
             function updateTopic(){
@@ -150,8 +160,6 @@
                     noiTalk("さて、次の話題は「"+topics[index]+"」です。")
                 }
             }
-
-
             function generateFakeConversation(){
                 let users = Object.keys(listenerComments)
                 let commentCount = 1 + Math.floor(Math.random()*3)
@@ -165,17 +173,6 @@
                     }
                 }
             }
-
-            async function aiTalk(){
-                const res = await fetch("/api/talk",{method:"POST"})
-                const data = await res.json()
-                const text = data.choices[0].message.content
-                noiTalk(text)
-            }
-            function noiReply(comment){
-                setTimeout(()=>{noiTalk("なるほど、「"+comment+"」という反応がありますね。")},2000)
-            }
-
             function addChat(name,text){
                 const chat = document.getElementById("chat")
                 const msg = document.createElement("div")
@@ -186,6 +183,7 @@
         </script>
     </body>
 </html>
+
 
 
 
