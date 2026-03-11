@@ -58,9 +58,11 @@
             let streamRunning=false
             let streamStart
             let streamDuration=60*60*1000
-
+            let lastActivity = Date.now()
             let talking=false
-
+            let lastComment = ""
+            let commentHistory = []
+            
             const charSpeed=100
 
             const topics=[
@@ -108,17 +110,26 @@
             }
 
             async function loop(){
-
                 if(!streamRunning)return
                 updateTopic()
-                if(!talking){
-                    if(Math.random()<0.4){
-                        await aiTalk()
-                        generateComments()
+                if(Date.now() - lastNoiTalk > 3000 && !talking){
+                    if(Math.random() < 0.5 && lastComment){
+                        await aiReplyComment()
                     }else{
+                        await aiTalk()}
+                    generateComments()
+                }else if(!talking){
+                    let r = Math.random()
+                    if(r < 0.3){
                         randomComment()
+                    }else if(r < 0.6){
+                        randomComment()
+                    }else{
+                        await aiReplyComment()
                     }
-
+                }else{
+                    await aiTalk()
+                    generateComments()
                 }
                 let next=3000+Math.random()*4000
                 setTimeout(loop,next)
@@ -139,15 +150,29 @@
                     document.getElementById("topic").innerText=
                     "テーマ: "+topics[index]
                     noiTalk("さて、次の話題は「"+topics[index]+"」です。")
+                    setTimeout(()=>{aiTalk()},2000)
                 }
             }
 
             async function aiTalk(){
-                const res=await fetch("/api/talk",{method:"POST"})
-                const data=await res.json()
+                const res = await fetch("/api/talk",{method:"POST"})
+                const data = await res.json()
                 await noiTalk(data.text)
             }
-
+            
+            async function aiReplyComment(){
+                if(!lastComment) return
+                const res = await fetch("/api/talk",{
+                    method:"POST",
+                    headers:{"Content-Type":"application/json"},
+                    body:JSON.stringify({type:"reply",comment:lastComment})
+                    })
+                
+                const data = await res.json()
+                
+                await noiTalk(data.text)
+            }
+            
             function randomComment(){
                 let users=Object.keys(listenerComments)
                 let user=users[Math.floor(Math.random()*users.length)]
@@ -164,24 +189,31 @@
             }
 
             async function noiTalk(text){
-                talking=true
-                const box=document.getElementById("talkBox")
-                box.innerText=""
+                talking = true
+                lastActivity = Date.now()
+                const box = document.getElementById("talkBox")
+                box.innerText = ""
                 let display=""
                 for(let i=0;i<text.length;i++){
-                    display+=text[i]
-                    box.innerText=display
+                    display += text[i]
+                    box.innerText = display
                     await sleep(charSpeed)
                 }
-                talking=false
+                talking = false
+                lastActivity = Date.now()
             }
 
             function addChat(name,text){
-                const chat=document.getElementById("chat")
-                const msg=document.createElement("div")
-                msg.innerText=name+" : "+text
+                const chat = document.getElementById("chat")
+                const msg = document.createElement("div")
+                msg.innerText = name + " : " + text
                 chat.appendChild(msg)
-                chat.scrollTop=chat.scrollHeight
+                chat.scrollTop = chat.scrollHeight
+                lastComment = text
+                commentHistory.push(text)
+                if(commentHistory.length > 10){
+                    commentHistory.shift()
+                }
             }
 
             function sleep(ms){
@@ -192,3 +224,4 @@
     </body>
 
 </html>
+
