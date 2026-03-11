@@ -157,7 +157,7 @@
             async function aiTalk(){
                 const res = await fetch("/api/talk",{method:"POST"})
                 const data = await res.json()
-                await noiTalk(data.text)
+                await noiTalk(data.talk)
             }
             
             async function aiReplyComment(){
@@ -170,7 +170,7 @@
                 
                 const data = await res.json()
                 
-                await noiTalk(data.text)
+                await noiTalk(data.talk)
             }
             
             function randomComment(){
@@ -224,4 +224,5 @@
     </body>
 
 </html>
+
 
