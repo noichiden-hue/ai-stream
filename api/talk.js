@@ -25,6 +25,7 @@ ${title}
 ・配信雑談トーン
 ・軽い感想
 
+自己紹介は不要です。
 雑談コメントを作ってください。
 `
 const response = await fetch(
