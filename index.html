@@ -3,6 +3,7 @@
     <head>
         <meta charset="UTF-8">
         <title>知電のい 配信</title>
+
         <style>
 
             body{
@@ -12,178 +13,181 @@
             }
 
             #container{
-                width:800px;
+                width:900px;
                 margin:auto;
             }
 
+            #topic{
+                margin:10px 0;
+                font-size:20px;
+            }
+
+            #talkBox{
+                border:1px solid #888;
+                padding:15px;
+                height:120px;
+                margin-bottom:10px;
+                font-size:18px;
+            }
+
             #chat{
-                height:300px;
+                height:260px;
                 overflow:auto;
                 border:1px solid #555;
                 padding:10px;
-                margin-top:10px;
             }
 
             button{
                 padding:10px 20px;
                 font-size:16px;
+                margin-bottom:10px;
             }
-
         </style>
     </head>
-
     <body>
         <div id="container">
             <h1>知電のい 配信</h1>
             <button onclick="startStream()">配信開始</button>
             <p id="topic">待機中</p>
+            <div id="talkBox">配信者トーク</div>
             <div id="chat"></div>
         </div>
 
         <script>
 
-            let streamRunning = false
+            let streamRunning=false
             let streamStart
-            let streamDuration = 60 * 60 * 1000
-        
-            const topics = [
+            let streamDuration=60*60*1000
+
+            let talking=false
+
+            const charSpeed=500
+
+            const topics=[
                 "今日のゲームトレンド",
                 "インディーゲーム",
                 "話題のゲーム",
-                "最近遊んだゲーム"
+                "最近のゲームニュース"
             ]
 
-            const listeners = [
-                "のい推し",
-                "祭り勢",
-                "冷静ツッコミ",
-                "ROM勢"
-            ]
-
-            const comments = [
-                "それわかる",
-                "神ゲーでは？",
-                "草",
-                "気になる",
-                "それSwitchあります？",
-                "今日も観測助かる"
-            ]
-            
-            const listenerComments = {
+            const listenerComments={
                 "のい推し":[
                     "それめっちゃわかる",
                     "のいちゃん視点好き",
                     "今日の配信助かる"
-                    ],
+                ],
 
                 "祭り勢":[
                     "草",
                     "神ゲーの予感",
                     "それ盛り上がるやつ"
-                    ],
+                ],
 
                 "冷静ツッコミ":[
                     "それ積みゲーでは？",
                     "また増えますね",
                     "それ昨日も言ってません？"
-                    ],
+                ],
 
                 "ROM勢":[
                     "それSwitchあります？",
                     "どんなゲームです？",
                     "プレイ時間どのくらいですか？"
-                    ]
+                ]
             }
 
-            function startStream(){
-                if(streamRunning) return
+            let currentTopicIndex=-1
 
-                streamRunning = true
-                streamStart = Date.now()
+            function startStream(){
+                if(streamRunning)return
+                streamRunning=true
+                streamStart=Date.now()
                 addChat("SYSTEM","配信開始")
                 noiTalk("ログインしました。知電のいです。")
                 loop()
             }
 
-            function loop(){
+            async function loop(){
 
-                if(!streamRunning) return
-                if(Math.random() < 0.3){
-                    aiTalk()
-                }
+                if(!streamRunning)return
                 updateTopic()
-                generateFakeConversation()
-                let next = 2000 + Math.random()*5000
-                setTimeout(loop,next)
-                if(Date.now() - streamStart > streamDuration){
-                    noiTalk("そろそろ時間ですね。")
-                    setTimeout(()=>{
-                        noiTalk("知電のいでした。ログアウトします。")
-                        addChat("SYSTEM","配信終了")
-                        },3000)
-
-                    streamRunning = false
-                    return
+                if(!talking){
+                    if(Math.random()<0.4){
+                        await aiTalk()
+                        generateComments()
+                    }else{
+                        randomComment()
+                    }
 
                 }
+                let next=3000+Math.random()*4000
+                setTimeout(loop,next)
+                if(Date.now()-streamStart>streamDuration){
+                    await noiTalk("そろそろ時間ですね。")
+                    await noiTalk("知電のいでした。ログアウトします。")
+                    addChat("SYSTEM","配信終了")
+                    streamRunning=false
+                }
             }
-
-
-            function noiTalk(text){
-                const chat = document.getElementById("chat")
-                const msg = document.createElement("div")
-                msg.innerText = "知電のい : " + text
-                chat.appendChild(msg)
-                chat.scrollTop = chat.scrollHeight
-            }
-
-            async function aiTalk(){
-                const res = await fetch("/api/talk",{method:"POST"})
-                const data = await res.json()
-                const text = data.text
-                noiTalk(text)
-            }
-            function noiReply(comment){
-                setTimeout(()=>{noiTalk("なるほど、「"+comment+"」という反応がありますね。")},2000)
-            }
-            
-            let currentTopicIndex = -1
 
             function updateTopic(){
-                let elapsed = Date.now() - streamStart
-                let index = Math.floor(elapsed / (15*60*1000))
-                if(index >= topics.length) index = topics.length-1
-                if(index !== currentTopicIndex){
-                    currentTopicIndex = index
-                    document.getElementById("topic").innerText =
-                    "テーマ: " + topics[index]
+                let elapsed=Date.now()-streamStart
+                let index=Math.floor(elapsed/(15*60*1000))
+                if(index>=topics.length)index=topics.length-1
+                if(index!==currentTopicIndex){
+                    currentTopicIndex=index
+                    document.getElementById("topic").innerText=
+                    "テーマ: "+topics[index]
                     noiTalk("さて、次の話題は「"+topics[index]+"」です。")
                 }
             }
-            function generateFakeConversation(){
-                let users = Object.keys(listenerComments)
-                let commentCount = 1 + Math.floor(Math.random()*3)
-                for(let i=0;i<commentCount;i++){
-                    let user = users[Math.floor(Math.random()*users.length)]
-                    let list = listenerComments[user]
-                    let text = list[Math.floor(Math.random()*list.length)]
-                    addChat(user,text)
-                    if(Math.random() < 0.2){
-                        noiReply(text)
-                    }
+
+            async function aiTalk(){
+                const res=await fetch("/api/talk",{method:"POST"})
+                const data=await res.json()
+                await noiTalk(data.text)
+            }
+
+            function randomComment(){
+                let users=Object.keys(listenerComments)
+                let user=users[Math.floor(Math.random()*users.length)]
+                let list=listenerComments[user]
+                let text=list[Math.floor(Math.random()*list.length)]
+                addChat(user,text)
+            }
+
+            function generateComments(){
+                let count=1+Math.floor(Math.random()*3)
+                for(let i=0;i<count;i++){
+                    setTimeout(()=>{ randomComment() },1000*i)
                 }
             }
-            function addChat(name,text){
-                const chat = document.getElementById("chat")
-                const msg = document.createElement("div")
-                msg.innerText = name + " : " + text
-                chat.appendChild(msg)
-                chat.scrollTop = chat.scrollHeight
+
+            async function noiTalk(text){
+                talking=true
+                const box=document.getElementById("talkBox")
+                box.innerText=""
+                let display=""
+                for(let i=0;i<text.length;i++){
+                    display+=text[i]
+                    box.innerText=display
+                    await sleep(charSpeed)
+                }
+                talking=false
             }
+
+            function addChat(name,text){
+                const chat=document.getElementById("chat")
+                const msg=document.createElement("div")
+                msg.innerText=name+" : "+text
+                chat.appendChild(msg)
+                chat.scrollTop=chat.scrollHeight
+            }
+
+            function sleep(ms){
+                return new Promise(resolve=>setTimeout(resolve,ms))
+            }
+
         </script>
     </body>
 </html>
-
-
-
-
